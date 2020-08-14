@@ -1,0 +1,133 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+
+public class action
+{
+    public string name;
+    public string[] reaction = new string[3];
+    public int[] nastroenie = new int[3];
+}
+
+
+public class main : MonoBehaviour
+{
+    public Transform canvas;
+    public Font font;
+    public int nastroenie;
+
+
+    public Dictionary<string, action> acts = new Dictionary<string, action>();
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        nastroenie = 0;
+        action act = new action();
+        act.name = "Поиграть";
+        act.reaction[0] = "сидит на месте";
+        act.reaction[1] = "бегает за мячиком";
+        act.reaction[2] = "носится, как угорелая";
+        act.nastroenie[0] = 0;
+        act.nastroenie[1] = 1;
+        act.nastroenie[2] = 0;
+        acts.Add("Поиграть", act);
+        this.buttonCreate(act);
+
+        act = new action();
+        act.name = "Накормить";
+        act.reaction[0] = "все съедает";
+        act.reaction[1] = "быстро все съедает";
+        act.reaction[2] = "быстро все съедает";
+        act.nastroenie[0] = 1;
+        act.nastroenie[1] = 1;
+        act.nastroenie[2] = 0;
+        acts.Add("Накормить", act);
+        this.buttonCreate(act);
+
+        act = new action();
+        act.name = "Погладить";
+        act.reaction[0] = "царапает";
+        act.reaction[1] = "мурлычет";
+        act.reaction[2] = "мурлычет и виляет хвостом";
+        act.nastroenie[0] = 0;
+        act.nastroenie[1] = 1;
+        act.nastroenie[2] = 0;
+        acts.Add("Погладить", act);
+        this.buttonCreate(act);
+
+        act = new action();
+        act.name = "Дать пинка";
+        act.reaction[0] = "прыгает и кусает";
+        act.reaction[1] = " убегает на ковер и писает";
+        act.reaction[2] = "убегает в другую комнату";
+        act.nastroenie[0] = 0;
+        act.nastroenie[1] = -1;
+        act.nastroenie[2] = -2;
+        acts.Add("Дать пинка", act);
+        this.buttonCreate(act);
+    }
+
+    public void buttonCreate(action a) {
+        print("Button create");
+        GameObject newButton = new GameObject("New button", typeof(Image), typeof(Button), typeof(LayoutElement));
+        newButton.transform.SetParent(canvas);
+        newButton.transform.localScale = new Vector3(1, 1 , 1);
+        newButton.GetComponent<RectTransform>().sizeDelta = new Vector2(100f, 50f);
+        newButton.GetComponent<LayoutElement>().minWidth = 30;
+        GameObject newText = new GameObject("New text", typeof(Text));
+        newText.transform.SetParent(newButton.transform);
+        newText.GetComponent<Text>().text = a.name;
+        newText.GetComponent<Text>().font = font;
+        newText.transform.localScale = new Vector3(1, 1, 1);
+        RectTransform rt = newText.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0, 0);
+        rt.anchorMax = new Vector2(1, 1);
+        rt.anchoredPosition = new Vector2(0, 0);
+        rt.sizeDelta = new Vector2(0, 0);
+        newText.GetComponent<Text>().color = new Color(0, 0, 0);
+        newText.GetComponent<Text>().alignment = TextAnchor.MiddleCenter;
+        newButton.GetComponent<Button>().onClick.AddListener(delegate { press(a); });
+
+
+        EventTrigger.Entry eventtype = new EventTrigger.Entry();
+        eventtype.eventID = EventTriggerType.PointerEnter;
+        eventtype.callback.AddListener((eventData) => { OnPointerEnter(a); });
+
+        newButton.AddComponent<EventTrigger>();
+        newButton.GetComponent<EventTrigger>().triggers.Add(eventtype);
+    }
+
+    public void press(action a)
+    {
+        GameObject.Find("TextCat").GetComponent<Text>().text = a.reaction[nastroenie];
+        nastroenie += a.nastroenie[nastroenie];
+        string nast = "плохое";
+        if (nastroenie == 0) {
+            nast = "Плохое";
+        }
+        if (nastroenie == 1) {
+            nast = "Хорошее";
+        }
+        if (nastroenie == 2) {
+            nast = "Отличное";
+        }
+        GameObject.Find("TextCatNastroenie").GetComponent<Text>().text = nast;
+    }
+
+    public void OnPointerEnter(action a)
+    {
+        GameObject.Find("TextCatReaction").GetComponent<Text>().text = a.reaction[nastroenie];
+    }
+
+    public void Exit()
+    {
+        print("exit");
+        Application.Quit();
+    }
+}
